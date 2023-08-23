@@ -18,7 +18,13 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     private SessionFactory sessionFactory;
 
     @Override
-    public List<Employee> getEmployees() {
+    public void addEmployee(Employee employee) {
+        Session currentSession = sessionFactory.getCurrentSession();
+        currentSession.saveOrUpdate(employee);
+    }
+
+    @Override
+    public List<Employee> getAllEmployees() {
         Session session = sessionFactory.getCurrentSession();
         CriteriaBuilder cb = session.getCriteriaBuilder();
         CriteriaQuery<Employee> cq = cb.createQuery(Employee.class);
@@ -29,16 +35,15 @@ public class EmployeeDAOImpl implements EmployeeDAO {
     }
 
     @Override
-    public void saveEmployee(Employee employee) {
-        Session currentSession = sessionFactory.getCurrentSession();
-        currentSession.saveOrUpdate(employee);
-    }
-
-    @Override
-    public Employee getEmployee(int id) {
+    public Employee getEmployeeById(int id) {
         Session currentSession = sessionFactory.getCurrentSession();
         Employee employee = currentSession.get(Employee.class, id);
         return employee;
+    }
+
+    @Override
+    public void updateEmployee(Employee employee) {
+
     }
 
     @Override

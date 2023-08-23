@@ -5,11 +5,13 @@ import entity.Employee;
 import java.util.List;
 
 public interface EmployeeDAO {
-    public List<Employee> getEmployees();
+    public void addEmployee(Employee employee);
 
-    public void saveEmployee(Employee employee);
+    public List<Employee> getAllEmployees();
 
-    public Employee getEmployee(int id);
+    public Employee getEmployeeById(int id);
+
+    public void updateEmployee(Employee employee);
 
     public void deleteEmployee(int id);
 }

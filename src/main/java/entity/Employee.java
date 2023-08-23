@@ -1,12 +1,13 @@
 package entity;
 
 import javax.persistence.*;
+import java.util.Objects;
 
 @Entity
 @Table(name = "employee")
 public class Employee {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "employee_id")
     private int id;
 
@@ -19,13 +20,15 @@ public class Employee {
     @Column(name = "position_id")
     private int positionId;
 
+    private String position;
+
     public Employee() {
     }
 
-    public Employee(String name, String lastname, int positionId) {
+    public Employee(String name, String lastname, String position) {
         this.name = name;
         this.lastname = lastname;
-        this.positionId = positionId;
+        this.position = position;
     }
 
     public int getId() {
@@ -52,12 +55,33 @@ public class Employee {
         this.lastname = lastname;
     }
 
-    public long getPositionId() {
+    public int getPositionId() {
         return positionId;
     }
 
     public void setPositionId(int positionId) {
         this.positionId = positionId;
+    }
+
+    public String getPosition() {
+        return position;
+    }
+
+    public void setPosition(String position) {
+        this.position = position;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Employee)) return false;
+        Employee employee = (Employee) o;
+        return id == employee.id && positionId == employee.positionId && name.equals(employee.name) && lastname.equals(employee.lastname);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, lastname, positionId);
     }
 
     @Override

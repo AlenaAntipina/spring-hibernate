@@ -1,93 +1,90 @@
 package service;
 
-import config.DbConnection;
+import config.SessionUtil;
 import dao.ProjectDAO;
 import entity.Project;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public class ProjectService implements ProjectDAO {
-    private final Connection connection = DbConnection.getConnection();
-
+public class ProjectService extends SessionUtil implements ProjectDAO {
     @Override
     public void addProject(Project project) {
-        String sql = "INSERT INTO project (projectname) VALUES (?)";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, project.getProject());
+        Session session = getSession();
+        session.save(project);
 
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
     public List<Project> getAllProjects() {
-        List<Project> projects = new ArrayList<>();
-        String sql = "SELECT projectname FROM project";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT * FROM project";
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id";
 
-            while (resultSet.next()) {
-                Project project = new Project(resultSet.getString("projectname"));
 
-                projects.add(project);
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Project.class);
+        List<Project> projects = query.list();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return projects;
     }
 
     @Override
-    public Project getEProjectById(int id) {
-        Project project = new Project();
-        String sql = "SELECT projectname FROM project WHERE id = ?";
+    public Project getProjectById(int id) {
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id\n" +
+//                "WHERE id = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        //open session with a transaction
+        openTransactionSession();
 
-            project.setProject(resultSet.getString("projectname"));
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "SELECT * FROM project WHERE project_id = :id";
+
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Project.class);
+        query.setParameter("id", id);
+
+        Project project = (Project) query.getSingleResult();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return project;
     }
 
     @Override
     public void updateProject(Project project) {
-        String sql = "UPDATE project SET projectname = ? where project_id = ?";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, project.getProject());
-            preparedStatement.setInt(2, project.getId());
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.update(project);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
-    public void deleteProject(int id) {
-        String sql = "DELETE FROM project WHERE id = ?";
+    public void deleteProject(Project project) {
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.remove(project);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 }

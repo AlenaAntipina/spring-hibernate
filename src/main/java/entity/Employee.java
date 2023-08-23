@@ -1,7 +1,9 @@
 package entity;
 
 import javax.persistence.*;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 
 @Entity
 @Table(name = "employee")
@@ -17,19 +19,25 @@ public class Employee {
     @Column(name = "employeelastname")
     private String lastname;
 
-    @Column(name = "position_id")
-    private int positionId;
+    @ManyToOne(cascade = CascadeType.ALL)
+    @JoinColumn(name = "position_id", referencedColumnName = "position_id")
+    private Position position;
 
-    private String position;
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinTable(
+            name = "employee_project",
+            joinColumns = @JoinColumn(name = "employee_id"),
+            inverseJoinColumns = @JoinColumn(name = "project_id")
+    )
+    private Set<Project> projects;
 
     public Employee() {
     }
 
-    public Employee(String name, String lastname, String position) {
-        this.name = name;
-        this.lastname = lastname;
-        this.position = position;
-    }
+//    public Employee(String name, String lastname) {
+//        this.name = name;
+//        this.lastname = lastname;
+//    }
 
     public int getId() {
         return id;
@@ -55,33 +63,20 @@ public class Employee {
         this.lastname = lastname;
     }
 
-    public int getPositionId() {
-        return positionId;
-    }
-
-    public void setPositionId(int positionId) {
-        this.positionId = positionId;
-    }
-
-    public String getPosition() {
+    public Position getPosition() {
         return position;
     }
 
-    public void setPosition(String position) {
+    public void setPosition(Position position) {
         this.position = position;
     }
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Employee)) return false;
-        Employee employee = (Employee) o;
-        return id == employee.id && positionId == employee.positionId && name.equals(employee.name) && lastname.equals(employee.lastname);
+    public Set<Project> getProjects() {
+        return projects;
     }
 
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, lastname, positionId);
+    public void setProjects(Set<Project> projects) {
+        this.projects = projects;
     }
 
     @Override
@@ -90,7 +85,7 @@ public class Employee {
                 "id=" + id +
                 ", name='" + name + '\'' +
                 ", lastname='" + lastname + '\'' +
-                ", positionId=" + positionId +
+                ", position=" + position +
                 '}';
     }
 }

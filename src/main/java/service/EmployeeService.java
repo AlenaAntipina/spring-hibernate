@@ -1,108 +1,90 @@
 package service;
 
-import config.DbConnection;
+import config.SessionUtil;
 import dao.EmployeeDAO;
 import entity.Employee;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public class EmployeeService implements EmployeeDAO {
-
-    private final Connection connection = DbConnection.getConnection();
-
+public class EmployeeService extends SessionUtil implements EmployeeDAO {
     @Override
     public void addEmployee(Employee employee) {
-        String sql = "INSERT INTO employee " +
-                "(employeename, employeelastname, position_id)" +
-                "VALUES (?, ? ,?)";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, employee.getName());
-            preparedStatement.setString(2, employee.getLastname());
-            preparedStatement.setInt(3, employee.getPositionId());
+        Session session = getSession();
+        session.save(employee);
 
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
     public List<Employee> getAllEmployees() {
-        List<Employee> employees = new ArrayList<>();
-        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-                "JOIN positions ON employee.position_id = positions.position_id";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT * FROM employee";
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id";
 
-            while (resultSet.next()) {
-                Employee employee = new Employee(
-                        resultSet.getString("employeename"),
-                        resultSet.getString("employeelastname"),
-                        resultSet.getString("positionname"));
 
-                employees.add(employee);
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Employee.class);
+        List<Employee> employees = query.list();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return employees;
     }
 
     @Override
     public Employee getEmployeeById(int id) {
-        Employee employee = new Employee();
-        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-                "JOIN positions ON employee.position_id = positions.position_id\n" +
-                "WHERE id = ?";
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id\n" +
+//                "WHERE id = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        //open session with a transaction
+        openTransactionSession();
 
-            employee.setName(resultSet.getString("employeename"));
-            employee.setLastname(resultSet.getString("employeelastname"));
-            employee.setPosition(resultSet.getString("positionname"));
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "SELECT * FROM EMPLOYEE WHERE employee_id = :id";
+
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Employee.class);
+        query.setParameter("id", id);
+
+        Employee employee = (Employee) query.getSingleResult();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return employee;
     }
 
     @Override
     public void updateEmployee(Employee employee) {
-        String sql = "UPDATE employee SET employeename = ?, employeelastname = ?, position_id = ? where employee_id = ?";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, employee.getName());
-            preparedStatement.setString(2, employee.getLastname());
-            preparedStatement.setInt(3, employee.getPositionId());
-            preparedStatement.setInt(4, employee.getId());
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.update(employee);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
-    public void deleteEmployee(int id) {
-        String sql = "DELETE FROM employee WHERE id = ?";
+    public void deleteEmployee(Employee employee) {
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.remove(employee);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 }

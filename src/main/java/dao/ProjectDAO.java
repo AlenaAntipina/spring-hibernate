@@ -9,9 +9,9 @@ public interface ProjectDAO {
 
     public List<Project> getAllProjects();
 
-    public Project getEProjectById(int id);
+    public Project getProjectById(int id);
 
     public void updateProject(Project project);
 
-    public void deleteProject(int id);
+    public void deleteProject(Project project);
 }

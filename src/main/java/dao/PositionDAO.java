@@ -13,5 +13,5 @@ public interface PositionDAO {
 
     public void updatePosition(Position position);
 
-    public void deletePosition(int id);
+    public void deletePosition(Position position);
 }

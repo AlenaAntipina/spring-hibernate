@@ -1,93 +1,91 @@
 package service;
 
-import config.DbConnection;
+import config.SessionUtil;
 import dao.PositionDAO;
+import entity.Employee;
 import entity.Position;
+import org.hibernate.Session;
+import org.hibernate.query.Query;
 
-import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 
-public class PositionService implements PositionDAO {
-    private final Connection connection = DbConnection.getConnection();
-
+public class PositionService extends SessionUtil implements PositionDAO {
     @Override
     public void addPosition(Position position) {
-        String sql = "INSERT INTO positions (positionname) VALUES (?)";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, position.getPosition());
+        Session session = getSession();
+        session.save(position);
 
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
     public List<Position> getAllPositions() {
-        List<Position> positions = new ArrayList<>();
-        String sql = "SELECT positionname FROM positions";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (Statement statement = connection.createStatement()) {
-            ResultSet resultSet = statement.executeQuery(sql);
+        String sql = "SELECT * FROM positions";
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id";
 
-            while (resultSet.next()) {
-                Position position = new Position(resultSet.getString("positionname"));
 
-                positions.add(position);
-            }
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Position.class);
+        List<Position> positions = query.list();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return positions;
     }
 
     @Override
     public Position getPositionById(int id) {
-        Position position = new Position();
-        String sql = "SELECT positionname FROM positions WHERE id = ?";
+//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
+//                "JOIN positions ON employee.position_id = positions.position_id\n" +
+//                "WHERE id = ?";
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            ResultSet resultSet = preparedStatement.executeQuery();
+        //open session with a transaction
+        openTransactionSession();
 
-            position.setPosition(resultSet.getString("positionname"));
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        String sql = "SELECT * FROM positions WHERE position_id = :id";
+
+        Session session = getSession();
+        Query query = session.createNativeQuery(sql).addEntity(Position.class);
+        query.setParameter("id", id);
+
+        Position position = (Position) query.getSingleResult();
+
+        //close session with a transaction
+        closeTransactionSession();
 
         return position;
     }
 
     @Override
     public void updatePosition(Position position) {
-        String sql = "UPDATE positions SET positionname = ? where position_id = ?";
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setString(1, position.getPosition());
-            preparedStatement.setInt(2, position.getId());
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.update(position);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 
     @Override
-    public void deletePosition(int id) {
-        String sql = "DELETE FROM positions WHERE id = ?";
+    public void deletePosition(Position position) {
+        //open session with a transaction
+        openTransactionSession();
 
-        try (PreparedStatement preparedStatement = connection.prepareStatement(sql)) {
-            preparedStatement.setInt(1, id);
-            preparedStatement.executeUpdate();
-        }
-        catch (SQLException e) {
-            e.printStackTrace();
-        }
+        Session session = getSession();
+        session.remove(position);
+
+        //close session with a transaction
+        closeTransactionSession();
     }
 }

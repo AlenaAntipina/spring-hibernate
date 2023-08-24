@@ -1,90 +1,57 @@
 package service;
 
-import config.SessionUtil;
-import dao.EmployeeDAO;
+import dao.EmployeeDAOImpl;
+import dto.UserPositionDTO;
+import dto.UserProjectsDTO;
 import entity.Employee;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class EmployeeService extends SessionUtil implements EmployeeDAO {
-    @Override
+@Service
+public class EmployeeService {
+    private EmployeeDAOImpl employeeDAO = new EmployeeDAOImpl();
+
+    private UserPositionDTO convertToUserPositionDTO(Employee employee) {
+        UserPositionDTO userPositionDTO = new UserPositionDTO();
+        userPositionDTO.setUsername(employee.getName());
+        userPositionDTO.setLastname(employee.getLastname());
+        userPositionDTO.setPosition(employee.getPosition().getPosition());
+        return userPositionDTO;
+    }
+
+    private UserProjectsDTO convertToUserProjectsDTO(Employee employee) {
+        UserProjectsDTO userProjectsDTO = new UserProjectsDTO();
+        userProjectsDTO.setName(employee.getName());
+        userProjectsDTO.setLastname(employee.getLastname());
+        userProjectsDTO.setProjects(employee.getProjects());
+        return userProjectsDTO;
+    }
+
     public void addEmployee(Employee employee) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.save(employee);
-
-        //close session with a transaction
-        closeTransactionSession();
+        employeeDAO.addEmployee(employee);
     }
 
-    @Override
-    public List<Employee> getAllEmployees() {
-        //open session with a transaction
-        openTransactionSession();
-
-        String sql = "SELECT * FROM employee";
-//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-//                "JOIN positions ON employee.position_id = positions.position_id";
-
-
-        Session session = getSession();
-        Query query = session.createNativeQuery(sql).addEntity(Employee.class);
-        List<Employee> employees = query.list();
-
-        //close session with a transaction
-        closeTransactionSession();
-
-        return employees;
+    public List<UserProjectsDTO> getUserProjectsByName(String name, String lastname) {
+        return employeeDAO.getEmployeeProjectsByName(name, lastname)
+                .stream()
+                .map(this::convertToUserProjectsDTO)
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public Employee getEmployeeById(int id) {
-//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-//                "JOIN positions ON employee.position_id = positions.position_id\n" +
-//                "WHERE id = ?";
-
-        //open session with a transaction
-        openTransactionSession();
-
-        String sql = "SELECT * FROM EMPLOYEE WHERE employee_id = :id";
-
-        Session session = getSession();
-        Query query = session.createNativeQuery(sql).addEntity(Employee.class);
-        query.setParameter("id", id);
-
-        Employee employee = (Employee) query.getSingleResult();
-
-        //close session with a transaction
-        closeTransactionSession();
-
-        return employee;
+    public List<UserPositionDTO> getEmployeeByPosition(String position) {
+        return employeeDAO.getEmployeeByPosition(position)
+                .stream()
+                .map(this::convertToUserPositionDTO)
+                .collect(Collectors.toList());
     }
 
-    @Override
     public void updateEmployee(Employee employee) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.update(employee);
-
-        //close session with a transaction
-        closeTransactionSession();
+        employeeDAO.updateEmployee(employee);
     }
 
-    @Override
     public void deleteEmployee(Employee employee) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.remove(employee);
-
-        //close session with a transaction
-        closeTransactionSession();
+        employeeDAO.deleteEmployee(employee);
     }
 }

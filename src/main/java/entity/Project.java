@@ -1,8 +1,14 @@
 package entity;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Column;
+import javax.persistence.ManyToMany;
+import javax.persistence.FetchType;
+import java.util.List;
 
 @Entity
 @Table(name="project")
@@ -15,15 +21,11 @@ public class Project {
     @Column(name="projectname")
     private String project;
 
-    @ManyToMany(mappedBy = "projects")
-    private Set<Employee> employees;
+    @ManyToMany(mappedBy = "projects", fetch = FetchType.EAGER)
+    private List<Employee> employees;
 
     public Project() {
     }
-
-//    public Project(String project) {
-//        this.project = project;
-//    }
 
     public int getId() {
         return id;
@@ -41,11 +43,11 @@ public class Project {
         this.project = project;
     }
 
-    public Set<Employee> getEmployees() {
+    public List<Employee> getEmployees() {
         return employees;
     }
 
-    public void setEmployees(Set<Employee> employees) {
+    public void setEmployees(List<Employee> employees) {
         this.employees = employees;
     }
 

@@ -1,9 +1,18 @@
 package entity;
 
-import javax.persistence.*;
-import java.util.HashSet;
-import java.util.Objects;
-import java.util.Set;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Column;
+import javax.persistence.ManyToMany;
+import javax.persistence.ManyToOne;
+import javax.persistence.CascadeType;
+import javax.persistence.JoinColumn;
+import javax.persistence.JoinTable;
+import javax.persistence.FetchType;
+import java.util.List;
 
 @Entity
 @Table(name = "employee")
@@ -23,21 +32,16 @@ public class Employee {
     @JoinColumn(name = "position_id", referencedColumnName = "position_id")
     private Position position;
 
-    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinTable(
             name = "employee_project",
             joinColumns = @JoinColumn(name = "employee_id"),
             inverseJoinColumns = @JoinColumn(name = "project_id")
     )
-    private Set<Project> projects;
+    private List<Project> projects;
 
     public Employee() {
     }
-
-//    public Employee(String name, String lastname) {
-//        this.name = name;
-//        this.lastname = lastname;
-//    }
 
     public int getId() {
         return id;
@@ -71,11 +75,11 @@ public class Employee {
         this.position = position;
     }
 
-    public Set<Project> getProjects() {
+    public List<Project> getProjects() {
         return projects;
     }
 
-    public void setProjects(Set<Project> projects) {
+    public void setProjects(List<Project> projects) {
         this.projects = projects;
     }
 

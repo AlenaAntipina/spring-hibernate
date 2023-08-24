@@ -1,4 +1,4 @@
-package config;
+package utils;
 
 import org.hibernate.Session;
 import org.hibernate.Transaction;
@@ -9,10 +9,6 @@ public class SessionUtil {
 
     public Session getSession() {
         return session;
-    }
-
-    public Transaction getTransaction() {
-        return transaction;
     }
 
     public Session openSession() {

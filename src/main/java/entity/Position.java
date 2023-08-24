@@ -1,6 +1,12 @@
 package entity;
 
-import javax.persistence.*;
+import javax.persistence.Entity;
+import javax.persistence.Table;
+import javax.persistence.Id;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Column;
+import javax.persistence.OneToMany;
 import java.util.List;
 
 @Entity
@@ -20,10 +26,6 @@ public class Position {
     public Position() {
     }
 
-//    public Position(String position) {
-//        this.position = position;
-//    }
-
     public int getId() {
         return id;
     }
@@ -38,6 +40,14 @@ public class Position {
 
     public void setPosition(String position) {
         this.position = position;
+    }
+
+    public List<Employee> getEmployees() {
+        return employees;
+    }
+
+    public void setEmployees(List<Employee> employees) {
+        this.employees = employees;
     }
 
     @Override

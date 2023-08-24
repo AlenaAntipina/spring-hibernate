@@ -1,90 +1,45 @@
 package service;
 
-import config.SessionUtil;
-import dao.ProjectDAO;
+import dao.ProjectDAOImpl;
+import dto.ProjectUsersDTO;
 import entity.Project;
-import org.hibernate.Session;
-import org.hibernate.query.Query;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
-public class ProjectService extends SessionUtil implements ProjectDAO {
-    @Override
+@Service
+public class ProjectService {
+
+    private ProjectDAOImpl projectDAO = new ProjectDAOImpl();
+
+    private ProjectUsersDTO convertToProjectUsersDTO(Project project) {
+        ProjectUsersDTO projectUsersDTO = new ProjectUsersDTO();
+        projectUsersDTO.setProject(project.getProject());
+        projectUsersDTO.setEmployees(project.getEmployees());
+        return projectUsersDTO;
+    }
+
     public void addProject(Project project) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.save(project);
-
-        //close session with a transaction
-        closeTransactionSession();
+        projectDAO.addProject(project);
     }
 
-    @Override
-    public List<Project> getAllProjects() {
-        //open session with a transaction
-        openTransactionSession();
-
-        String sql = "SELECT * FROM project";
-//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-//                "JOIN positions ON employee.position_id = positions.position_id";
-
-
-        Session session = getSession();
-        Query query = session.createNativeQuery(sql).addEntity(Project.class);
-        List<Project> projects = query.list();
-
-        //close session with a transaction
-        closeTransactionSession();
-
-        return projects;
+    public List<ProjectUsersDTO> getProjectUsers(String project) {
+        return projectDAO.getProjectAllUsers(project)
+                .stream()
+                .map(this::convertToProjectUsersDTO)
+                .collect(Collectors.toList());
     }
 
-    @Override
     public Project getProjectById(int id) {
-//        String sql = "SELECT employeename, employeelastname, positionname FROM employee\n" +
-//                "JOIN positions ON employee.position_id = positions.position_id\n" +
-//                "WHERE id = ?";
-
-        //open session with a transaction
-        openTransactionSession();
-
-        String sql = "SELECT * FROM project WHERE project_id = :id";
-
-        Session session = getSession();
-        Query query = session.createNativeQuery(sql).addEntity(Project.class);
-        query.setParameter("id", id);
-
-        Project project = (Project) query.getSingleResult();
-
-        //close session with a transaction
-        closeTransactionSession();
-
-        return project;
+        return projectDAO.getProjectById(id);
     }
 
-    @Override
     public void updateProject(Project project) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.update(project);
-
-        //close session with a transaction
-        closeTransactionSession();
+        projectDAO.updateProject(project);
     }
 
-    @Override
     public void deleteProject(Project project) {
-        //open session with a transaction
-        openTransactionSession();
-
-        Session session = getSession();
-        session.remove(project);
-
-        //close session with a transaction
-        closeTransactionSession();
+        projectDAO.deleteProject(project);
     }
 }
